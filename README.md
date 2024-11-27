@@ -91,6 +91,27 @@ sudo openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -d
 sudo chmod 644 key.pem cert.pem
 ```
 
+### HTTPS Desteği için başka bir not:
+
+Burada açıkçası docker desteği sağlarken şifreli bir key oluşturma sürecinin nasıl olacağını belirtmekte fayda olabilir. Bunun için öncelikle **nginx/cert/password** dosyasına bir şifre girmek gerekiyor. 
+
+Ardından aşağıdaki komut ile bir **key** dosyası oluşturulmalı.
+
+```bash
+sudo openssl genrsa -aes256 -out $(pwd)/nginx/cert/server.key 2048
+```
+Sonrasında ise aşağıdaki komut ile **crt** dosyası oluşturulmalı.
+
+```bash
+sudo openssl genrsa -aes256 -out $(pwd)/nginx/cert/server.key 2048
+
+openssl req -new -x509 \
+    -key $(pwd)/nginx/cert/server.key \
+    -out $(pwd)/nginx/cert/server.crt \
+    -days 365 \
+    -subj "/CN=localhost"
+```
+
 Örnek projedeki sertifikalar hem backend servisinde hem de frontend tarafında ortaklaşa kullanılmaktadır. Buna istinaden servis ve node.js taraflarında da SSL kullanımı için gerekli kod değişiklikleri yapılmıştır.
 
 Bu adımlardan sonra curl, postman veya browser'lardan https ile ilgili servis komutlarına erişim sağlanabilir.
@@ -98,3 +119,4 @@ Bu adımlardan sonra curl, postman veya browser'lardan https ile ilgili servis k
 ### Notlar
 
 - Web API tarafına ait testler için [postman_collection](postman_collection.json) Postman koleksiyonu kullanılabilir.
+- Docker için "docker compose up" komutu yeterli. Ancak burada sistemi docker üzerine taşırken araya **"nginx"** eklemesi yapıldı. Haliyle docker üzerinden çalıştıracak olursanız "https://localhost/" adresi yeterli olacaktır. Port ayarları talep edildiği takdirde **"compose.yml"** ve **"nginx"** dosyalarında ilgili ayarlar yapıldıktan sonra kullanıma alınabilir.
